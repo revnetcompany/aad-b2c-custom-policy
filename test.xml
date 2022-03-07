@@ -1,0 +1,208 @@
+
+    <!-- <ClaimsProvider>
+      <DisplayName>Local Account SignIn</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="REST-UserMembershipValidator">
+          <Metadata>
+            <Item Key="client_id">ca0c333a-7908-4045-a4ab-8e0a0f0bf49a</Item>
+            <Item Key="IdTokenAudience">b1a8fac1-7e46-4d0b-8413-9b5f26539ca7</Item>
+          </Metadata>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="client_id" DefaultValue="ca0c333a-7908-4045-a4ab-8e0a0f0bf49a" />
+            <InputClaim ClaimTypeReferenceId="resource_id" PartnerClaimType="resource" DefaultValue="b1a8fac1-7e46-4d0b-8413-9b5f26539ca7" />
+          </InputClaims>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider> -->
+
+    <!-- <ClaimsProvider>
+      <DisplayName>REST API</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="PeopleAuthentication">
+          <DisplayName>Retrieves security groups assigned to the user</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.RestfulProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="ServiceUrl">https://api-people-vol.roskilde-festival.dk/api/memberApi/1/authenticatemember</Item>
+            <Item Key="AuthenticationType">None</Item>
+            <Item Key="SendClaimsIn">Body</Item>
+            <Item Key="AllowInsecureAuthInProduction">true</Item>
+
+            <Item Key="DebugMode">true</Item>
+          </Metadata>
+          <InputClaims>
+            <InputClaim Required="true" ClaimTypeReferenceId="objectId" />
+          </InputClaims>
+          <OutputClaims>
+            <!-- <OutputClaim ClaimTypeReferenceId="groups" /> -->
+          </OutputClaims>
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-Noop" />
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider> -->
+
+  </ClaimsProviders>
+
+  <!--UserJourneys>
+	
+	</UserJourneys-->
+  <UserJourneys>
+
+    <UserJourney Id="SignUpOrSignIn">
+      <OrchestrationSteps>
+
+        <OrchestrationStep Order="1" Type="CombinedSignInAndSignUp" ContentDefinitionReferenceId="api.signuporsignin">
+          <ClaimsProviderSelections>
+            <ClaimsProviderSelection ValidationClaimsExchangeId="LocalAccountSigninEmailExchange" />
+          </ClaimsProviderSelections>
+          <ClaimsExchanges>
+            <ClaimsExchange Id="LocalAccountSigninEmailExchange" TechnicalProfileReferenceId="GetUserClaimsFromAPI" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="2" Type="ClaimsExchange">
+          <Preconditions>
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="true">
+              <Value>objectId</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <ClaimsExchange Id="SignUpWithLogonEmailExchange" TechnicalProfileReferenceId="LocalAccountSignUpWithLogonEmail" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <!-- This step reads any user attributes that we may not have received when in the token. -->
+        <OrchestrationStep Order="3" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="AADUserReadWithObjectId" TechnicalProfileReferenceId="AAD-UserReadUsingObjectId" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="4" Type="SendClaims" CpimIssuerTechnicalProfileReferenceId="JwtIssuer" />
+
+      </OrchestrationSteps>
+      <ClientDefinition ReferenceId="DefaultWeb" />
+    </UserJourney>
+
+    <UserJourney Id="ProfileEdit">
+      <OrchestrationSteps>
+
+        <OrchestrationStep Order="1" Type="ClaimsProviderSelection" ContentDefinitionReferenceId="api.idpselections">
+          <ClaimsProviderSelections>
+            <ClaimsProviderSelection TargetClaimsExchangeId="LocalAccountSigninEmailExchange" />
+          </ClaimsProviderSelections>
+        </OrchestrationStep>
+        <OrchestrationStep Order="2" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="LocalAccountSigninEmailExchange" TechnicalProfileReferenceId="SelfAsserted-LocalAccountSignin-Email" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+        <OrchestrationStep Order="3" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="AADUserReadWithObjectId" TechnicalProfileReferenceId="AAD-UserReadUsingObjectId" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="4" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="B2CUserProfileUpdateExchange" TechnicalProfileReferenceId="SelfAsserted-ProfileUpdate" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+        <OrchestrationStep Order="5" Type="SendClaims" CpimIssuerTechnicalProfileReferenceId="JwtIssuer" />
+
+      </OrchestrationSteps>
+      <ClientDefinition ReferenceId="DefaultWeb" />
+    </UserJourney>
+
+    <UserJourney Id="PasswordReset">
+      <OrchestrationSteps>
+        <OrchestrationStep Order="1" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="PasswordResetUsingEmailAddressExchange" TechnicalProfileReferenceId="LocalAccountDiscoveryUsingEmailAddress" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+        <OrchestrationStep Order="2" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="NewCredentials" TechnicalProfileReferenceId="LocalAccountWritePasswordUsingObjectId" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+        <OrchestrationStep Order="3" Type="SendClaims" CpimIssuerTechnicalProfileReferenceId="JwtIssuer" />
+      </OrchestrationSteps>
+      <ClientDefinition ReferenceId="DefaultWeb" />
+    </UserJourney>
+
+  </UserJourneys>
+</TrustFrameworkPolicy>
+
+
+
+<!-- <ClaimsTransformation Id="GenerateRequestBody" TransformationMethod="GenerateJson">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="Username" TransformationClaimType="signInName" />
+          <InputClaim ClaimTypeReferenceId="Password" TransformationClaimType="password"/>
+        </InputClaims>
+        <InputParameters>
+          <InputParameter Id="ApiKey" DataType="string" Value="5A879B9C-BD0A-4825-83DF-FADD30801380"/>
+        </InputParameters>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="requestBody" TransformationClaimType="outputClaim"/>
+        </OutputClaims>
+      </ClaimsTransformation> -->
+<!-- 
+      <ClaimsTransformation Id="GenerateRequestBody1" TransformationMethod="GenerateJson">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="email" TransformationClaimType="customerEntity.email" />
+          <InputClaim ClaimTypeReferenceId="objectId" TransformationClaimType="customerEntity.userObjectId" />
+          <InputClaim ClaimTypeReferenceId="givenName" TransformationClaimType="customerEntity.firstName" />
+          <InputClaim ClaimTypeReferenceId="surname" TransformationClaimType="customerEntity.lastName" />
+        </InputClaims>
+        <InputParameters>
+          <InputParameter Id="customerEntity.role.name" DataType="string" Value="Administrator"/>
+          <InputParameter Id="customerEntity.role.id" DataType="long" Value="1"/>
+        </InputParameters>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="requestBody1" TransformationClaimType="outputClaim"/>
+        </OutputClaims>
+      </ClaimsTransformation> -->
+
+<!-- <TechnicalProfile Id="REST-UserMembershipValidator">
+          <DisplayName>Validate user input data and return loyaltyNumber claim</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.RestfulProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+
+          <Metadata>
+            <Item Key="ServiceUrl">https://api-people-vol.roskilde-festival.dk/api/memberApi/1/authenticatemember</Item>
+            <Item Key="AuthenticationType">None</Item>
+            <Item Key="AllowInsecureAuthInProduction">true</Item>
+            <Item Key="scope">custom rest</Item>
+            <Item Key="DebugMode">true</Item>
+            <Item Key="SendClaimsIn">Body</Item>
+            <Item Key="ClaimUsedForRequestPayload">sendGridReqBody</Item>
+            <Item Key="DefaultUserMessageIfRequestFailed">Cannot process your request right now, please try again later.</Item>
+          </Metadata>
+          <!-- <InputClaimsTransformations> -->
+<!-- <ClaimsTransformation Id="GenerateRequestBody" TransformationMethod="GenerateJson" /> -->
+
+<!-- </InputClaimsTransformations> -->
+<InputClaimsTransformations>
+
+  <InputClaimsTransformation ReferenceId="GenerateRequestBody" />
+  <!-- <InputClaimsTransformation ReferenceId="GenerateSendGridRequestBody" /> -->
+</InputClaimsTransformations>
+<InputClaims>
+
+  <!-- <InputClaim ClaimTypeReferenceId="sendGridReqBody" /> -->
+  <InputClaim ClaimTypeReferenceId="requestBody" />
+  <!-- <InputClaim ClaimTypeReferenceId="signInName" PartnerClaimType="username" Required="true" />
+            <InputClaim ClaimTypeReferenceId="password" Required="true" />
+            <InputClaim ClaimTypeReferenceId="grant_type" DefaultValue="password" AlwaysUseDefaultValue="true" />
+            <InputClaim ClaimTypeReferenceId="scope" DefaultValue="custom-rest" AlwaysUseDefaultValue="true" />
+            <InputClaim ClaimTypeReferenceId="nca" PartnerClaimType="nca" DefaultValue="1" /> -->
+</InputClaims>
+<OutputClaims>
+  <!-- <OutputClaim ClaimTypeReferenceId="" PartnerClaimType="MemberId" /> -->
+  <OutputClaim ClaimTypeReferenceId="MemberName" PartnerClaimType="given_name" />
+  <!-- <OutputClaim ClaimTypeReferenceId="givenName" PartnerClaimType="MemberName" /> -->
+  <!-- <OutputClaim ClaimTypeReferenceId="RequestBody" /> -->
+  <!-- <OutputClaim ClaimTypeReferenceId="givenName" PartnerClaimType="given_name" /> -->
+</OutputClaims>
+</TechnicalProfile> -->

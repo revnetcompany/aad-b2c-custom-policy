@@ -1,0 +1,210 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TrustFrameworkPolicy xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06" PolicySchemaVersion="0.3.0.0" TenantId="rfgsso.onmicrosoft.com" PolicyId="B2C_1A_TrustFrameworkExtensions" PublicPolicyUri="http://rfgsso.onmicrosoft.com/B2C_1A_TrustFrameworkExtensions">
+
+  <BasePolicy>
+    <TenantId>rfgsso.onmicrosoft.com</TenantId>
+    <PolicyId>B2C_1A_TrustFrameworkLocalization</PolicyId>
+  </BasePolicy>
+
+
+  <BuildingBlocks>
+    <ClaimsSchema>
+      <ClaimType Id="Password">
+        <DisplayName>Role</DisplayName>
+        <DataType>string</DataType>
+        <UserInputType>Password</UserInputType>
+        <!-- <UserHelpText>Contains one or more roles associated with a user.</UserHelpText> -->
+      </ClaimType>
+      <ClaimType Id="Username">
+        <DisplayName>People Username</DisplayName>
+        <DataType>string</DataType>
+        <!-- <UserHelpText>The User Principal Name uniquely identifies the user.</UserHelpText> -->
+      </ClaimType>
+      <ClaimType Id="MemberId">
+        <DisplayName>People Username</DisplayName>
+        <DataType>string</DataType>
+        <!-- <UserHelpText>The User Principal Name uniquely identifies the user.</UserHelpText> -->
+      </ClaimType>
+      <ClaimType Id="ApiKey">
+        <DisplayName>People Username</DisplayName>
+        <DataType>string</DataType>
+        <!-- <UserHelpText>The User Principal Name uniquely identifies the user.</UserHelpText> -->
+      </ClaimType>
+      <ClaimType Id="requestBody">
+        <DisplayName>People Username</DisplayName>
+        <DataType>string</DataType>
+        <!-- <UserHelpText>The User Principal Name uniquely identifies the user.</UserHelpText> -->
+      </ClaimType>
+    </ClaimsSchema>
+    <ClaimsTransformations>
+      <ClaimsTransformation Id="GenerateRequestBody" TransformationMethod="GenerateJson">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="password" TransformationClaimType="Password" />
+          <InputClaim ClaimTypeReferenceId="signInName" TransformationClaimType="Username" />
+          <!-- <InputClaim ClaimTypeReferenceId="Password" TransformationClaimType="password" />
+          <InputClaim ClaimTypeReferenceId="Username" TransformationClaimType="signInName" /> -->
+        </InputClaims>
+        <InputParameters>
+          <InputParameter Id="ApiKey" DataType="string" Value="5A879B9C-BD0A-4825-83DF-FADD30801380" />
+        </InputParameters>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="requestBody" TransformationClaimType="outputClaim" />
+        </OutputClaims>
+      </ClaimsTransformation>
+    </ClaimsTransformations>
+  </BuildingBlocks>
+
+  <ClaimsProviders>
+    <ClaimsProvider>
+      <DisplayName>External Claims Source</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="PeopleAuthentication">
+          <DisplayName>Get claims for user from external system.</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.RestfulProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <!-- <Item Key="ServiceUrl">{{ClaimsApiUrl}}</Item>
+            <Item Key="SendClaimsIn">Body</Item>
+            <Item Key="AuthenticationType">None</Item>
+            <Item Key="AllowInsecureAuthInProduction">true</Item> -->
+
+            <Item Key="ServiceUrl">https://pps-callback-test.herokuapp.com/test-b2c</Item>
+            <!-- <Item Key="ServiceUrl">https://api-people-vol.roskilde-festival.dk/api/memberApi/1/authenticatemember</Item> -->
+            <Item Key="AuthenticationType">None</Item>
+            <Item Key="SendClaimsIn">Body</Item>
+            <Item Key="AllowInsecureAuthInProduction">true</Item>
+            <Item Key="DefaultUserMessageIfRequestFailed">DefaultUserMessageIfRequestFailed</Item>
+            <Item Key="UserMessageIfCircuitOpen">UserMessageIfCircuitOpen</Item>
+            <Item Key="UserMessageIfDnsResolutionFailed">UserMessageIfDnsResolutionFailed</Item>
+            <Item Key="UserMessageIfRequestTimeout">UserMessageIfRequestTimeout</Item>
+            <Item Key="DebugMode">true</Item>
+
+            <Item Key="SignUpTarget">SignUpWithLogonEmailExchange</Item>
+            <Item Key="ContentDefinitionReferenceId">api.localaccountsignin</Item>
+          </Metadata>
+          <IncludeInSso>false</IncludeInSso>
+
+          <!-- <InputClaimsTransformations>
+            <InputClaimsTransformation ReferenceId="GenerateRequestBody" />
+          </InputClaimsTransformations> -->
+
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="userPrincipalName" />
+            <InputClaim ClaimTypeReferenceId="givenName" />
+            <InputClaim ClaimTypeReferenceId="surname" />
+            <InputClaim ClaimTypeReferenceId="objectId" Required="true" DefaultValue="empty" />
+            <!-- <InputClaim ClaimTypeReferenceId="signInName" /> -->
+            <InputClaim ClaimTypeReferenceId="signInName" PartnerClaimType="Username" DefaultValue="DefaultValue" Required="true" />
+            <InputClaim ClaimTypeReferenceId="password" PartnerClaimType="Password" DefaultValue="Test" Required="true" />
+            <InputClaim ClaimTypeReferenceId="ApiKey" AlwaysUseDefaultValue="true" DefaultValue="5A879B9C-BD0A-4825-83DF-FADD30801380" />
+            <!-- <InputClaim ClaimTypeReferenceId="Username" PartnerClaimType="signInName" Required="true" />
+            <InputClaim ClaimTypeReferenceId="Password" PartnerClaimType="password" Required="true" /> -->
+
+            <!-- <InputClaim ClaimTypeReferenceId="requestBody" PartnerClaimType="" /> -->
+          </InputClaims>
+
+          <!-- Claims sent to your REST API -->
+          <!-- <InputClaims>
+            <InputClaim ClaimTypeReferenceId="password" PartnerClaimType="Password" />
+            <InputClaim ClaimTypeReferenceId="signInName" PartnerClaimType="Username" />
+          </InputClaims> -->
+          <OutputClaims>
+            <!-- Claims parsed from your REST API -->
+            <!-- <OutputClaim ClaimTypeReferenceId="Username" /> -->
+            <OutputClaim ClaimTypeReferenceId="MemberId" DefaultValue="test" />
+
+            <OutputClaim ClaimTypeReferenceId="signInName" Required="true" />
+            <OutputClaim ClaimTypeReferenceId="password" Required="true" />
+            <!-- <OutputClaim ClaimTypeReferenceId="objectId" />
+            <OutputClaim ClaimTypeReferenceId="authenticationSource" /> -->
+          </OutputClaims>
+
+        </TechnicalProfile>
+
+        <!-- This technical profile uses a validation technical profile to authenticate the user. -->
+        <TechnicalProfile Id="SelfAsserted-PeopleAccountSignin-Email">
+          <DisplayName>Local Account Signin</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.SelfAssertedAttributeProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="SignUpTarget">SignUpWithLogonEmailExchange</Item>
+            <Item Key="setting.operatingMode">Email</Item>
+            <Item Key="ContentDefinitionReferenceId">api.localaccountsignin</Item>
+          </Metadata>
+          <IncludeInSso>false</IncludeInSso>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="signInName" />
+          </InputClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="signInName" Required="true" />
+            <OutputClaim ClaimTypeReferenceId="password" Required="true" />
+            <OutputClaim ClaimTypeReferenceId="objectId" />
+            <OutputClaim ClaimTypeReferenceId="authenticationSource" />
+          </OutputClaims>
+          <ValidationTechnicalProfiles>
+            <ValidationTechnicalProfile ReferenceId="PeopleAuthentication" />
+          </ValidationTechnicalProfiles>
+          <!-- <UseTechnicalProfileForSessionManagement ReferenceId="SM-AAD" /> -->
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+
+    <ClaimsProvider>
+      <DisplayName>Local Account SignIn</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="login-NonInteractive">
+          <Metadata>
+            <Item Key="client_id">ca0c333a-7908-4045-a4ab-8e0a0f0bf49a</Item>
+            <Item Key="IdTokenAudience">b1a8fac1-7e46-4d0b-8413-9b5f26539ca7</Item>
+          </Metadata>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="client_id" DefaultValue="ca0c333a-7908-4045-a4ab-8e0a0f0bf49a" />
+            <InputClaim ClaimTypeReferenceId="resource_id" PartnerClaimType="resource" DefaultValue="b1a8fac1-7e46-4d0b-8413-9b5f26539ca7" />
+          </InputClaims>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+
+  </ClaimsProviders>
+
+  <UserJourneys>
+
+    <UserJourney Id="SignUpOrSignIn">
+      <OrchestrationSteps>
+        <!-- ContentDefinitionReferenceId refers to the html template used for this step -->
+        <OrchestrationStep Order="1" Type="CombinedSignInAndSignUp" ContentDefinitionReferenceId="api.signuporsignin">
+          <ClaimsProviderSelections>
+            <ClaimsProviderSelection ValidationClaimsExchangeId="LocalAccountSigninEmailExchange" />
+          </ClaimsProviderSelections>
+          <ClaimsExchanges>
+            <!-- SelfAsserted-LocalAccountSignin-Email -->
+            <!-- <ClaimsExchange Id="LocalAccountSigninEmailExchange" TechnicalProfileReferenceId="SelfAsserted-PeopleAccountSignin-Email" /> -->
+            <ClaimsExchange Id="LocalAccountSigninEmailExchange" TechnicalProfileReferenceId="PeopleAuthentication" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="2" Type="ClaimsExchange">
+          <Preconditions>
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="true">
+              <Value>objectId</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <ClaimsExchange Id="SignUpWithLogonEmailExchange" TechnicalProfileReferenceId="PeopleAuthentication" />
+            <!-- <ClaimsExchange Id="SignUpWithLogonEmailExchange" TechnicalProfileReferenceId="LocalAccountSignUpWithLogonEmail" /> -->
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <!-- This step reads any user attributes that we may not have received when in the token. -->
+        <OrchestrationStep Order="3" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="AADUserReadWithObjectId" TechnicalProfileReferenceId="AAD-UserReadUsingObjectId" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="4" Type="SendClaims" CpimIssuerTechnicalProfileReferenceId="JwtIssuer" />
+
+      </OrchestrationSteps>
+      <ClientDefinition ReferenceId="DefaultWeb" />
+    </UserJourney>
+  </UserJourneys>
+</TrustFrameworkPolicy>
